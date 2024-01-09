@@ -1,0 +1,355 @@
+[
+    {
+        "Bank Information" : {
+                                "Bank Name" : "",
+                                "Bank Address" : "",
+                                "Bank Contact Number" : "",
+                                "User Account Number" : "",
+                                "User Address" : ""
+                            },
+
+        "Transaction Summary" : [
+            {
+                "January" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "February" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "March" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "April" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "May" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "June" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "July" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "August" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "September" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "October" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "November" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ],
+                "December" : [
+                    {
+                        "ATM" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Cheques" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Electronic" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ],
+                        "Others" : [
+                            {
+                                "Withdrawls" : "",
+                                "Deposits" : ""
+                            }
+                        ]
+                    }
+                ]
+
+            }
+        ],
+
+        "Overall Bank Statement Insights" : ""
+    }
+]
