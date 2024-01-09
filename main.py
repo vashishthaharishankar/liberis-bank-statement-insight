@@ -383,7 +383,6 @@ def extract_pdf_content(file_path):
         # Check if the PDF is encrypted
         print('Is file encrypted? ',pdf_reader.is_encrypted)
         if pdf_reader.is_encrypted:
-            st.write('Decrypting File..')
             # Try to decrypt the PDF with the provided password
             password = extract_password(file_path)
             if password:
