@@ -383,6 +383,7 @@ def extract_pdf_content(file_path):
         # Check if the PDF is encrypted
         print('Is file encrypted? ',pdf_reader.is_encrypted)
         if pdf_reader.is_encrypted:
+            st.write('Decrypting File..')
             # Try to decrypt the PDF with the provided password
             password = extract_password(file_path)
             if password:
@@ -396,7 +397,7 @@ def extract_pdf_content(file_path):
                         for page_num in range(num_pages):
                             page = pdf_reader.pages[page_num]
                             content += page.extract_text()
-                        print("PDF Password Found.")
+                        #print("PDF Password Found.")
                         return content
                 if not found:
                     try:
@@ -407,7 +408,7 @@ def extract_pdf_content(file_path):
                             content += page.extract_text()
                         return content
                     except:
-                        print("Incorrect password. Could not decrypt the PDF.")
+                        #print("Incorrect password. Could not decrypt the PDF.")
                         st.write("Incorrect password. Could not decrypt the PDF.")
                         return None
             else:
@@ -419,7 +420,7 @@ def extract_pdf_content(file_path):
                         content += page.extract_text()
                     return content
                 except:
-                    print("File password not found in Database.")
+                    #print("File password not found in Database.")
                     st.write("File password not found in Database.")
                     return None
         else:
@@ -501,10 +502,10 @@ def handling_gpt_ouput(gpt_response):
     try:
         # Try parsing the variable as a list
         parsed_variable = ast.literal_eval(gpt_response)
-        logging.info('GPT response parsed successfully.')
+        #logging.info('GPT response parsed successfully.')
         if isinstance(parsed_variable, list):
             # If it's already a list, return it as is
-            logging.info('GPT response is already a JSON inside list.')
+            #logging.info('GPT response is already a JSON inside list.')
             return parsed_variable
     except (ValueError, SyntaxError):
         pass
@@ -514,13 +515,13 @@ def handling_gpt_ouput(gpt_response):
     try:
         if start_index != -1 and end_index != -1:
             extracted_content = gpt_response[start_index:end_index + 1]
-            logging.info(f'Extracted GPT response as JSON in string format: {extracted_content}')
+            #logging.info(f'Extracted GPT response as JSON in string format: {extracted_content}')
             output = eval(extracted_content)
-            logging.info(f'Evaluated(eval()) string JSON response inside list: {[output]}')
+            #logging.info(f'Evaluated(eval()) string JSON response inside list: {[output]}')
             return  [output]  # Return the extracted content as a list
-        logging.exception(f'handling_gpt_output_failed()- returning empty list :{gpt_response}')
+        #logging.exception(f'handling_gpt_output_failed()- returning empty list :{gpt_response}')
     except:
-        print('Got error')
+        #print('Got error')
         pass
     return []  # Return an empty list if extraction fails
 
@@ -544,7 +545,7 @@ def extract_information_from_text(extracted_statement):
     response = client.chat.completions.create(model=model_engine,messages=conversation1,temperature = 0)
     jsonify_response = response.choices[0].message.content
     output = handling_gpt_ouput(jsonify_response)
-    logging.info(output)
+    #logging.info(output)
     return output
 
 # Create a function to handle file download
@@ -556,11 +557,11 @@ def download_file(file_content, file_name):
 def app_layout():
     file_name_with_extension = uploaded_file.name
     extracted_data = extract_pdf_content(file_name_with_extension)
-    print(extracted_data)
+    #print(extracted_data)
 
     if extracted_data is not None:
         response_text = extract_information_from_text(extracted_data)
-        print('\n\n',response_text)
+        #print('\n\n',response_text)
         output = dataframe(response_text)
         st.table(output)
         generated_file = output.to_csv(index=False)
@@ -568,8 +569,8 @@ def app_layout():
         st.markdown(download_file(generated_file, 'transaction_summary'), unsafe_allow_html=True)
         return  response_text
     else:
-        print('\n\nPDF Extractor returned None.')
-        st.write('\n\nPDF Extraction Failed.')
+        #print('\n\nPDF Extractor returned None.')
+        st.write('PDF Extraction Failed!')
         return  None
 
 if __name__ == "__main__":
