@@ -377,40 +377,28 @@ def extract_password(file_name):
             password_list.append(str(row['Password']))
     return password_list  # File not found, return None for both values
 
-def extract_pdf_content(file_path):
-    with open(file_path, 'rb') as pdf_file:
-        pdf_reader = PdfReader(pdf_file)
-        # Check if the PDF is encrypted
-        print('Is file encrypted? ',pdf_reader.is_encrypted)
-        if pdf_reader.is_encrypted:
-            # Try to decrypt the PDF with the provided password
-            password = extract_password(file_path)
-            if password:
-                found = False
-                for password_name in password:
-                    if pdf_reader.decrypt(password_name):
-                        found = True
-                        num_pages = len(pdf_reader.pages)
-                        content = ''
-                        # Extract text from each page
-                        for page_num in range(num_pages):
-                            page = pdf_reader.pages[page_num]
-                            content += page.extract_text()
-                        #print("PDF Password Found.")
-                        return content
-                if not found:
-                    try:
-                        num_pages = len(pdf_reader.pages)
-                        content = ''
-                        for page_num in range(num_pages):
-                            page = pdf_reader.pages[page_num]
-                            content += page.extract_text()
-                        return content
-                    except:
-                        #print("Incorrect password. Could not decrypt the PDF.")
-                        st.write("Incorrect password. Could not decrypt the PDF.")
-                        return None
-            else:
+def extract_pdf_content(uploaded_file):
+    file_path = uploaded_file.name
+    pdf_reader = PdfReader(uploaded_file)
+    # Check if the PDF is encrypted
+    print('Is file encrypted? ',pdf_reader.is_encrypted)
+    if pdf_reader.is_encrypted:
+        # Try to decrypt the PDF with the provided password
+        password = extract_password(file_path)
+        if password:
+            found = False
+            for password_name in password:
+                if pdf_reader.decrypt(password_name):
+                    found = True
+                    num_pages = len(pdf_reader.pages)
+                    content = ''
+                    # Extract text from each page
+                    for page_num in range(num_pages):
+                        page = pdf_reader.pages[page_num]
+                        content += page.extract_text()
+                    #print("PDF Password Found.")
+                    return content
+            if not found:
                 try:
                     num_pages = len(pdf_reader.pages)
                     content = ''
@@ -419,17 +407,29 @@ def extract_pdf_content(file_path):
                         content += page.extract_text()
                     return content
                 except:
-                    #print("File password not found in Database.")
-                    st.write("File password not found in Database.")
+                    #print("Incorrect password. Could not decrypt the PDF.")
+                    st.write("Incorrect password. Could not decrypt the PDF.")
                     return None
         else:
-            # Extract text from each page if PDF is not encrypted
-            num_pages = len(pdf_reader.pages)
-            content = ''
-            for page_num in range(num_pages):
-                page = pdf_reader.pages[page_num]
-                content += page.extract_text()
-            return content
+            try:
+                num_pages = len(pdf_reader.pages)
+                content = ''
+                for page_num in range(num_pages):
+                    page = pdf_reader.pages[page_num]
+                    content += page.extract_text()
+                return content
+            except:
+                #print("File password not found in Database.")
+                st.write("File password not found in Database.")
+                return None
+    else:
+        # Extract text from each page if PDF is not encrypted
+        num_pages = len(pdf_reader.pages)
+        content = ''
+        for page_num in range(num_pages):
+            page = pdf_reader.pages[page_num]
+            content += page.extract_text()
+        return content
 
 def dataframe(response_text):
     months_name = ["January","February","March","April","May","June","July","August","September","October","November","December"]
@@ -554,8 +554,7 @@ def download_file(file_content, file_name):
     return href
 
 def app_layout():
-    file_name_with_extension = uploaded_file.name
-    extracted_data = extract_pdf_content(file_name_with_extension)
+    extracted_data = extract_pdf_content(uploaded_file)
     #print(extracted_data)
 
     if extracted_data is not None:
