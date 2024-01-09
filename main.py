@@ -578,12 +578,12 @@ if __name__ == "__main__":
         st.markdown(f"<style>{source_des.read()}</style>", unsafe_allow_html=True)
 
     st.title("Liberis Statement Insights")
-    uploaded_file = st.file_uploader("Upload Bank Statement")
+    uploaded_file = st.file_uploader("Upload Bank Statement 👇🏻")
     if uploaded_file is None:
         st.write("Waiting for file upload...")
     if uploaded_file is not None:
-        button = st.button("Upload")
+        button = st.button("Generate Summary 📝")
         if button:
-            with st.spinner("Loading"):
+            with st.spinner("Generating"):
                 app_layout()
 
