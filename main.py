@@ -7,14 +7,6 @@ import ast
 from PyPDF2 import PdfReader
 from datetime import datetime
 import base64
-from io import BytesIO
-from pydantic import BaseModel
-
-if len(logging.getLogger().handlers) > 0:
-    logging.getLogger().setLevel(logging.INFO)
-else:
-    logging.basicConfig(level=logging.INFO)
-
 
 raw_json = '''
 [
@@ -375,9 +367,9 @@ raw_json = '''
 '''
 def extract_password(file_name):
     '''
-    Hard Coded Database: credentials_database/info.xlsx
+    Hard Coded Database: info.xlsx
     '''
-    credentials_file_path = 'credentials_database/info.xlsx' # Hard Coded Database
+    credentials_file_path = 'info.xlsx' # Hard Coded Database
     df = pd.read_excel(credentials_file_path)
     password_list = []
     for index, row in df.iterrows():
@@ -385,18 +377,8 @@ def extract_password(file_name):
             password_list.append(str(row['Password']))
     return password_list  # File not found, return None for both values
 
-class File(BaseModel):
-    name: str
-    content: bytes
-
-    @classmethod
-    def from_bytes(cls, name: str, content: bytes):
-        return cls(name=name, content=content)
-
 def extract_pdf_content(uploaded_file):
-    # bytes_data = uploaded_file.read() uploaded_files_list.append(File.from_bytes(name=uploaded_file.name, content=bytes_data))
     file_path = uploaded_file.name
-    #with open(uploaded_file, 'rb') as pdf_file:
     pdf_reader = PdfReader(uploaded_file)
     # Check if the PDF is encrypted
     print('Is file encrypted? ',pdf_reader.is_encrypted)
@@ -414,7 +396,7 @@ def extract_pdf_content(uploaded_file):
                     for page_num in range(num_pages):
                         page = pdf_reader.pages[page_num]
                         content += page.extract_text()
-                    print("PDF Password Found.")
+                    #print("PDF Password Found.")
                     return content
             if not found:
                 try:
@@ -425,7 +407,7 @@ def extract_pdf_content(uploaded_file):
                         content += page.extract_text()
                     return content
                 except:
-                    print("Incorrect password. Could not decrypt the PDF.")
+                    #print("Incorrect password. Could not decrypt the PDF.")
                     st.write("Incorrect password. Could not decrypt the PDF.")
                     return None
         else:
@@ -437,7 +419,7 @@ def extract_pdf_content(uploaded_file):
                     content += page.extract_text()
                 return content
             except:
-                print("File password not found in Database.")
+                #print("File password not found in Database.")
                 st.write("File password not found in Database.")
                 return None
     else:
@@ -461,8 +443,6 @@ def dataframe(response_text):
     other_deposits = []
     for month in months_name:
         if response_text[0]["Transaction Summary"][0][month]:
-            print('\n\n',month,'\n\n')
-            print('\n\n',response_text[0]["Transaction Summary"][0][month],'\n\n')
             atm_withdrawls.append(response_text[0]["Transaction Summary"][0][month][0]["ATM"][0]["Withdrawls"])
             atm_deposits.append(response_text[0]["Transaction Summary"][0][month][0]["ATM"][0]["Deposits"])
             cheques_withdrawls.append(response_text[0]["Transaction Summary"][0][month][0]["Cheques"][0]["Withdrawls"])
@@ -521,10 +501,10 @@ def handling_gpt_ouput(gpt_response):
     try:
         # Try parsing the variable as a list
         parsed_variable = ast.literal_eval(gpt_response)
-        logging.info('GPT response parsed successfully.')
+        #logging.info('GPT response parsed successfully.')
         if isinstance(parsed_variable, list):
             # If it's already a list, return it as is
-            logging.info('GPT response is already a JSON inside list.')
+            #logging.info('GPT response is already a JSON inside list.')
             return parsed_variable
     except (ValueError, SyntaxError):
         pass
@@ -534,13 +514,13 @@ def handling_gpt_ouput(gpt_response):
     try:
         if start_index != -1 and end_index != -1:
             extracted_content = gpt_response[start_index:end_index + 1]
-            logging.info(f'Extracted GPT response as JSON in string format: {extracted_content}')
+            #logging.info(f'Extracted GPT response as JSON in string format: {extracted_content}')
             output = eval(extracted_content)
-            logging.info(f'Evaluated(eval()) string JSON response inside list: {[output]}')
+            #logging.info(f'Evaluated(eval()) string JSON response inside list: {[output]}')
             return  [output]  # Return the extracted content as a list
-        logging.exception(f'handling_gpt_output_failed()- returning empty list :{gpt_response}')
+        #logging.exception(f'handling_gpt_output_failed()- returning empty list :{gpt_response}')
     except:
-        print('Got error')
+        #print('Got error')
         pass
     return []  # Return an empty list if extraction fails
 
@@ -552,11 +532,10 @@ def extract_information_from_text(extracted_statement):
     system = f'''You are a Bank statement Auditor, whose task is to fill raw json format keys with the data provided in users bank statement:
                 Raw Json Format is: {raw_json} \n
                 Before proceding further you have to follow below instructions:
-                Instruction 1 is Extract Bank Name, Bank Address, Bank Contact Number, User Account Number, User Address from the top of statement.\n
-                Instruction 2 is Classify the transaction data month wise and insert the total sum of all amounts into the raw json format in respective keys.\n
-                Instruction 3 is Do not skip any data in response, you have to write everything in response, do not leave anything for user to follow pattern.\n
-                Instruction 4 is Fetch insight based on the overall transaction trends and pattern and insert that into overall_insight key of josn.\n
-                Instruction 5 is Return only response in JSON format please do not delete any keys of raw , structure should not change of unfilled json.\n
+                Instruction1 is Extract Bank Name, Bank Address, Bank Contact Number, User Account Number, User Address from the top of statement.\n
+                Instruction2 is Classify the transaction data month wise and insert the sum of amount into the raw json format in respective keys.\n
+                Instruction3 is Do not skip any data in response, you have to write everything in response, do not leave anything for user to follow pattern.\n
+                Instruction4 is Return only response in JSON format.\n
                 User Bank statement content is: {extracted_statement} \n
                 '''
     prompt2=f''' Give me the complete output in Json format from the response do not skip anything'''
@@ -564,9 +543,8 @@ def extract_information_from_text(extracted_statement):
     conversation1 = [{'role': 'system', 'content': system},{'role': 'user', 'content': prompt2}]
     response = client.chat.completions.create(model=model_engine,messages=conversation1,temperature = 0)
     jsonify_response = response.choices[0].message.content
-    print(jsonify_response)
     output = handling_gpt_ouput(jsonify_response)
-    logging.info(output)
+    #logging.info(output)
     return output
 
 # Create a function to handle file download
@@ -577,11 +555,11 @@ def download_file(file_content, file_name):
 
 def app_layout():
     extracted_data = extract_pdf_content(uploaded_file)
-    print(extracted_data)
+    #print(extracted_data)
 
     if extracted_data is not None:
         response_text = extract_information_from_text(extracted_data)
-        print('\n\n',response_text)
+        #print('\n\n',response_text)
         output = dataframe(response_text)
         st.table(output)
         generated_file = output.to_csv(index=False)
@@ -589,8 +567,8 @@ def app_layout():
         st.markdown(download_file(generated_file, 'transaction_summary'), unsafe_allow_html=True)
         return  response_text
     else:
-        print('\n\nPDF Extractor returned None.')
-        st.write('\n\nPDF Extraction Failed.')
+        #print('\n\nPDF Extractor returned None.')
+        st.write('PDF Extraction Failed!')
         return  None
 
 if __name__ == "__main__":
@@ -599,12 +577,11 @@ if __name__ == "__main__":
         st.markdown(f"<style>{source_des.read()}</style>", unsafe_allow_html=True)
 
     st.title("Liberis Statement Insights")
-    uploaded_file = st.file_uploader("Upload Bank Statement")
+    uploaded_file = st.file_uploader("Upload Bank Statement 👇🏻")
     if uploaded_file is None:
         st.write("Waiting for file upload...")
     if uploaded_file is not None:
-        button = st.button("Upload")
+        button = st.button("Generate Summary 📝")
         if button:
-            with st.spinner("Loading"):
+            with st.spinner("Generating"):
                 app_layout()
-
