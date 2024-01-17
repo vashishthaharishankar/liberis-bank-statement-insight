@@ -532,10 +532,11 @@ def extract_information_from_text(extracted_statement):
     system = f'''You are a Bank statement Auditor, whose task is to fill raw json format keys with the data provided in users bank statement:
                 Raw Json Format is: {raw_json} \n
                 Before proceding further you have to follow below instructions:
-                Instruction1 is Extract Bank Name, Bank Address, Bank Contact Number, User Account Number, User Address from the top of statement.\n
-                Instruction2 is Classify the transaction data month wise and insert the sum of amount into the raw json format in respective keys.\n
-                Instruction3 is Do not skip any data in response, you have to write everything in response, do not leave anything for user to follow pattern.\n
-                Instruction4 is Return only response in JSON format.\n
+                Instruction 1 is Extract Bank Name, Bank Address, Bank Contact Number, User Account Number, User Address from the top of statement.\n
+                Instruction 2 is Classify the transaction data month wise and insert the total sum of all amounts into the raw json format in respective keys.\n
+                Instruction 3 is Do not skip any data in response, you have to write everything in response, do not leave anything for user to follow pattern.\n
+                Instruction 4 is Fetch insight based on the overall transaction trends and pattern and insert that into overall_insight key of josn.\n
+                Instruction 5 is Return only response in JSON format please do not delete any keys of raw , structure should not change of unfilled json.\n
                 User Bank statement content is: {extracted_statement} \n
                 '''
     prompt2=f''' Give me the complete output in Json format from the response do not skip anything'''
