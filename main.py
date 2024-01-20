@@ -583,10 +583,10 @@ def dataframe(response_text):
 
     # dataframe1 = pd.read_excel('transaction_data.xlsx')
     dataframe2 = pd.DataFrame([sample_data])
-    dataframe3 = dataframe2.T
+    dataframe2 = dataframe2.T
     # dataframe1 = pd.concat([dataframe1, dataframe2], ignore_index=False)
     # dataframe1.to_excel('transaction_data.xlsx', index=False)
-    return dataframe_main,dataframe3
+    return dataframe_main,dataframe2
 
 def handling_gpt_ouput(gpt_response):
     try:
