@@ -376,9 +376,9 @@ raw_json = '''
 '''
 def extract_password(file_name):
     '''
-    Hard Coded Database: credentials_database/info.xlsx
+    Hard Coded Database: info.xlsx
     '''
-    credentials_file_path = 'credentials_database/info.xlsx' # Hard Coded Database
+    credentials_file_path = 'info.xlsx' # Hard Coded Database
     df = pd.read_excel(credentials_file_path)
     password_list = []
     for index, row in df.iterrows():
