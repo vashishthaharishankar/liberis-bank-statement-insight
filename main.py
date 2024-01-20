@@ -4,9 +4,17 @@ import streamlit as st
 import pandas as pd
 import logging
 import ast
+import re
 from PyPDF2 import PdfReader
 from datetime import datetime
 import base64
+from pydantic import BaseModel
+
+if len(logging.getLogger().handlers) > 0:
+    logging.getLogger().setLevel(logging.INFO)
+else:
+    logging.basicConfig(level=logging.INFO)
+
 
 raw_json = '''
 [
@@ -15,8 +23,9 @@ raw_json = '''
                                 "Bank Name" : "",
                                 "Bank Address" : "",
                                 "Bank Contact Number" : "",
-                                "User Account Number" : "",
-                                "User Address" : ""
+                                "Customer Name" : "",
+                                "Customer Account Number" : "",
+                                "Customer Address" : ""
                             },
 
         "Transaction Summary" : [
@@ -367,9 +376,9 @@ raw_json = '''
 '''
 def extract_password(file_name):
     '''
-    Hard Coded Database: info.xlsx
+    Hard Coded Database: credentials_database/info.xlsx
     '''
-    credentials_file_path = 'info.xlsx' # Hard Coded Database
+    credentials_file_path = 'credentials_database/info.xlsx' # Hard Coded Database
     df = pd.read_excel(credentials_file_path)
     password_list = []
     for index, row in df.iterrows():
@@ -377,8 +386,18 @@ def extract_password(file_name):
             password_list.append(str(row['Password']))
     return password_list  # File not found, return None for both values
 
+class File(BaseModel):
+    name: str
+    content: bytes
+
+    @classmethod
+    def from_bytes(cls, name: str, content: bytes):
+        return cls(name=name, content=content)
+
 def extract_pdf_content(uploaded_file):
+    # bytes_data = uploaded_file.read() uploaded_files_list.append(File.from_bytes(name=uploaded_file.name, content=bytes_data))
     file_path = uploaded_file.name
+    #with open(uploaded_file, 'rb') as pdf_file:
     pdf_reader = PdfReader(uploaded_file)
     # Check if the PDF is encrypted
     print('Is file encrypted? ',pdf_reader.is_encrypted)
@@ -396,7 +415,7 @@ def extract_pdf_content(uploaded_file):
                     for page_num in range(num_pages):
                         page = pdf_reader.pages[page_num]
                         content += page.extract_text()
-                    #print("PDF Password Found.")
+                    print("PDF Password Found.")
                     return content
             if not found:
                 try:
@@ -407,7 +426,7 @@ def extract_pdf_content(uploaded_file):
                         content += page.extract_text()
                     return content
                 except:
-                    #print("Incorrect password. Could not decrypt the PDF.")
+                    print("Incorrect password. Could not decrypt the PDF.")
                     st.write("Incorrect password. Could not decrypt the PDF.")
                     return None
         else:
@@ -419,7 +438,7 @@ def extract_pdf_content(uploaded_file):
                     content += page.extract_text()
                 return content
             except:
-                #print("File password not found in Database.")
+                print("File password not found in Database.")
                 st.write("File password not found in Database.")
                 return None
     else:
@@ -430,6 +449,69 @@ def extract_pdf_content(uploaded_file):
             page = pdf_reader.pages[page_num]
             content += page.extract_text()
         return content
+
+def generate_insight_based_on_monthly_average(monthly_transactions):
+    client = OpenAI()
+    client.api_key = os.getenv('OPENAI_API_KEY')
+    #model_engine = "gpt-3.5-turbo-1106"
+    model_engine = "gpt-4-1106-preview"
+    system = f'''You are a insight generator of the transactions data, user will provide you three values:\n
+                    1. total_deposits
+                    2. total_withdrawls
+                    3. monthly_average
+                based on this data you have to generate insight whether should the person qualifies for loan,\name
+                but before that consider one main point that the threshold to loan amount is 2.5 times of motnhly_average\n
+                example: loan_threshold = 2.5 * monthly_average
+                Below are the instructions which you have to follow before generating insights:\n
+                Instruction 1: Display insight depending on the threshold ( calculate threshold using formula 2.5 times average monthly revenue )
+                about how much lending we should do as per your analysis, but remember do not tell anything about threshold formula or threshold value.\n
+                just consider threshold only for you, do not show it to user.
+                Instruction 2: Insight should be short. \n
+
+                Below is the customer transaction data: {monthly_transactions}
+                '''
+    prompt2=f''' Return only Insight based on the user transaction data with your analysis. '''
+
+    conversation1 = [{'role': 'system', 'content': system},{'role': 'user', 'content': prompt2}]
+    response = client.chat.completions.create(model=model_engine,messages=conversation1,temperature = 0)
+    jsonify_response = response.choices[0].message.content
+    logging.info(jsonify_response)
+    return jsonify_response
+
+def average_monthly_balance(filled_gpt_json_data):
+
+    total_deposits = float(filled_gpt_json_data['total_ATM_deposits']) + float(filled_gpt_json_data['total_Cheques_deposits']) + float(filled_gpt_json_data['total_Electronic_deposits']) + float(filled_gpt_json_data['total_Other_deposits'])
+    total_withdrawls = float(filled_gpt_json_data['total_ATM_withdrawls']) + float(filled_gpt_json_data['total_Cheques_withdrawls']) + float(filled_gpt_json_data['total_Electronic_withdrawls']) + float(filled_gpt_json_data['total_Other_withdrawls'])
+    months_transaction = [
+        str(filled_gpt_json_data['january']),str(filled_gpt_json_data['february']),str(filled_gpt_json_data['march']),
+        str(filled_gpt_json_data['april']),str(filled_gpt_json_data['may']),str(filled_gpt_json_data['june']),
+        str(filled_gpt_json_data['july']),str(filled_gpt_json_data['august']),str(filled_gpt_json_data['september']),
+        str(filled_gpt_json_data['october']),str(filled_gpt_json_data['november']),str(filled_gpt_json_data['december'])
+        ]
+    month_count = 0
+    pattern = re.compile(r'[1-9]')
+    for month in months_transaction:
+        if pattern.search(month):
+            month_count += 1
+    if month_count>0:
+        monthly_average = float(total_deposits)/float(month_count)
+    else:
+        monthly_average = float(total_deposits)
+
+    data_for_gpt_to_fetch_lending_insight = {
+        'total_deposits' : total_deposits,
+        'total_withdrawls' : total_withdrawls,
+        'monthly_average' : monthly_average,
+    }
+    insight_based_on_lending_criteria = generate_insight_based_on_monthly_average(data_for_gpt_to_fetch_lending_insight)
+    main_data_shown_to_user = {
+                            'Customer Name' : filled_gpt_json_data['customer_name'],
+                            'Bank Name' : filled_gpt_json_data['bank_name'],
+                            'Address' : filled_gpt_json_data['bank_address'],
+                            'Average Monthly Revenue' : monthly_average,
+                            'Insight' : insight_based_on_lending_criteria,
+                        }
+    return main_data_shown_to_user
 
 def dataframe(response_text):
     months_name = ["January","February","March","April","May","June","July","August","September","October","November","December"]
@@ -443,6 +525,8 @@ def dataframe(response_text):
     other_deposits = []
     for month in months_name:
         if response_text[0]["Transaction Summary"][0][month]:
+            print('\n\n',month,'\n\n')
+            print('\n\n',response_text[0]["Transaction Summary"][0][month],'\n\n')
             atm_withdrawls.append(response_text[0]["Transaction Summary"][0][month][0]["ATM"][0]["Withdrawls"])
             atm_deposits.append(response_text[0]["Transaction Summary"][0][month][0]["ATM"][0]["Deposits"])
             cheques_withdrawls.append(response_text[0]["Transaction Summary"][0][month][0]["Cheques"][0]["Withdrawls"])
@@ -466,8 +550,9 @@ def dataframe(response_text):
                     'bank_name': response_text[0]["Bank Information"]["Bank Name"],
                     'bank_address': response_text[0]["Bank Information"]["Bank Address"],
                     'bank_contact_number': response_text[0]["Bank Information"]["Bank Contact Number"],
-                    'user_account_number': response_text[0]["Bank Information"]["User Account Number"],
-                    'user_address': response_text[0]["Bank Information"]["User Address"],
+                    'customer_name': response_text[0]["Bank Information"]["Customer Name"],
+                    'customer_account_number': response_text[0]["Bank Information"]["Customer Account Number"],
+                    'customer_address': response_text[0]["Bank Information"]["Customer Address"],
                     'insights': response_text[0]["Overall Bank Statement Insights"],
                     'january': response_text[0]["Transaction Summary"][0]["January"],
                     'february': response_text[0]["Transaction Summary"][0]["February"],
@@ -481,30 +566,34 @@ def dataframe(response_text):
                     'october': response_text[0]["Transaction Summary"][0]["October"],
                     'november': response_text[0]["Transaction Summary"][0]["November"],
                     'december': response_text[0]["Transaction Summary"][0]["December"],
-                    'total_ATM_withdrawals': atm_withdrawls_sum,
-                    'total_Card_withdrawals': atm_deposits_sum,
-                    'total_Electronic_withdrawals': cheques_withdrawls_sum,
-                    'total_Other_withdrawals': cheques_deposits_sum,
-                    'total_ATM_deposits': electronic_withdrawls_sum,
-                    'total_Card_deposits': electronic_deposits_sum,
-                    'total_Electronic_deposits': other_withdrawls_sum,
+                    'total_ATM_withdrawls': atm_withdrawls_sum,
+                    'total_ATM_deposits': atm_deposits_sum,
+                    'total_Cheques_withdrawls': cheques_withdrawls_sum,
+                    'total_Cheques_deposits': cheques_deposits_sum,
+                    'total_Electronic_withdrawls': electronic_withdrawls_sum,
+                    'total_Electronic_deposits': electronic_deposits_sum,
+                    'total_Other_withdrawls': other_withdrawls_sum,
                     'total_Other_deposits': other_deposits_sum
                 }
-    dataframe1 = pd.read_excel('transaction_data.xlsx')
+    output_to_display = average_monthly_balance(sample_data)
+    dataframe_main = pd.DataFrame([output_to_display])
+    dataframe_main = dataframe_main.T
+
+    # dataframe1 = pd.read_excel('transaction_data.xlsx')
     dataframe2 = pd.DataFrame([sample_data])
     dataframe3 = dataframe2.T
-    dataframe1 = pd.concat([dataframe1, dataframe2], ignore_index=False)
-    dataframe1.to_excel('transaction_data.xlsx', index=False)
-    return dataframe3
+    # dataframe1 = pd.concat([dataframe1, dataframe2], ignore_index=False)
+    # dataframe1.to_excel('transaction_data.xlsx', index=False)
+    return dataframe_main,dataframe3
 
 def handling_gpt_ouput(gpt_response):
     try:
         # Try parsing the variable as a list
         parsed_variable = ast.literal_eval(gpt_response)
-        #logging.info('GPT response parsed successfully.')
+        logging.info('GPT response parsed successfully.')
         if isinstance(parsed_variable, list):
             # If it's already a list, return it as is
-            #logging.info('GPT response is already a JSON inside list.')
+            logging.info('GPT response is already a JSON inside list.')
             return parsed_variable
     except (ValueError, SyntaxError):
         pass
@@ -514,13 +603,13 @@ def handling_gpt_ouput(gpt_response):
     try:
         if start_index != -1 and end_index != -1:
             extracted_content = gpt_response[start_index:end_index + 1]
-            #logging.info(f'Extracted GPT response as JSON in string format: {extracted_content}')
+            logging.info(f'Extracted GPT response as JSON in string format: {extracted_content}')
             output = eval(extracted_content)
-            #logging.info(f'Evaluated(eval()) string JSON response inside list: {[output]}')
+            logging.info(f'Evaluated(eval()) string JSON response inside list: {[output]}')
             return  [output]  # Return the extracted content as a list
-        #logging.exception(f'handling_gpt_output_failed()- returning empty list :{gpt_response}')
+        logging.exception(f'handling_gpt_output_failed()- returning empty list :{gpt_response}')
     except:
-        #print('Got error')
+        print('Got error')
         pass
     return []  # Return an empty list if extraction fails
 
@@ -544,45 +633,47 @@ def extract_information_from_text(extracted_statement):
     conversation1 = [{'role': 'system', 'content': system},{'role': 'user', 'content': prompt2}]
     response = client.chat.completions.create(model=model_engine,messages=conversation1,temperature = 0)
     jsonify_response = response.choices[0].message.content
+    print(jsonify_response)
     output = handling_gpt_ouput(jsonify_response)
-    #logging.info(output)
+    logging.info(output)
     return output
 
 # Create a function to handle file download
 def download_file(file_content, file_name):
     b64 = base64.b64encode(file_content.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="{file_name}.csv">Download Transaction Summary</a>'
+    href = f'<a href="data:file/csv;base64,{b64}" download="{file_name}.csv">👉🏻 Download Detailed Report</a>'
     return href
-
 def app_layout():
     extracted_data = extract_pdf_content(uploaded_file)
-    #print(extracted_data)
+    print(extracted_data)
 
     if extracted_data is not None:
         response_text = extract_information_from_text(extracted_data)
-        #print('\n\n',response_text)
+        print('\n\n',response_text)
         output = dataframe(response_text)
-        st.table(output)
-        generated_file = output.to_csv(index=False)
+        st.table(output[0])
+        st.table(output[1])
+        generated_file = output[1].to_csv(index=False)
         st.subheader(' ')
         st.markdown(download_file(generated_file, 'transaction_summary'), unsafe_allow_html=True)
+
         return  response_text
     else:
-        #print('\n\nPDF Extractor returned None.')
-        st.write('PDF Extraction Failed!')
+        print('\n\nPDF Extractor returned None.')
+        st.write('\n\nPDF Extraction Failed.')
         return  None
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
     with open("style.css") as source_des:
         st.markdown(f"<style>{source_des.read()}</style>", unsafe_allow_html=True)
-
+    output = ()
     st.title("Liberis Statement Insights")
-    uploaded_file = st.file_uploader("Upload Bank Statement 👇🏻")
+    uploaded_file = st.file_uploader("Upload Bank Statement")
     if uploaded_file is None:
         st.write("Waiting for file upload...")
     if uploaded_file is not None:
-        button = st.button("Generate Summary 📝")
+        button = st.button("Upload")
         if button:
-            with st.spinner("Generating"):
+            with st.spinner("Loading"):
                 app_layout()
