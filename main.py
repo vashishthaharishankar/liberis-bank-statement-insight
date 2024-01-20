@@ -464,8 +464,8 @@ def generate_insight_based_on_monthly_average(monthly_transactions):
                 example: loan_threshold = 2.5 * monthly_average
                 Below are the instructions which you have to follow before generating insights:\n
                 Instruction 1: Display insight depending on the threshold ( calculate threshold using formula 2.5 times average monthly revenue )
-                about how much lending we should do as per your analysis, but remember do not tell anything about threshold formula or threshold value.\n
-                just consider threshold only for you, do not show it to user.
+                about how much lending we should do as per your analysis.\n
+                Do not show threshold formula to user just consider it only for you.
                 Instruction 2: Insight should be short. \n
 
                 Below is the customer transaction data: {monthly_transactions}
@@ -641,7 +641,7 @@ def extract_information_from_text(extracted_statement):
 # Create a function to handle file download
 def download_file(file_content, file_name):
     b64 = base64.b64encode(file_content.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="{file_name}.csv">👉🏻 Download Detailed Report</a>'
+    href = f'<a href="data:file/csv;base64,{b64}" download="{file_name}.csv">👉🏻 Download detailed report</a>'
     return href
 def app_layout():
     extracted_data = extract_pdf_content(uploaded_file)
@@ -652,7 +652,7 @@ def app_layout():
         print('\n\n',response_text)
         output = dataframe(response_text)
         st.table(output[0])
-        st.table(output[1])
+        #st.table(output[1])
         generated_file = output[1].to_csv(index=False)
         st.subheader(' ')
         st.markdown(download_file(generated_file, 'Detailed Report'), unsafe_allow_html=True)
