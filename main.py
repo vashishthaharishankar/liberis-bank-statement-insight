@@ -455,19 +455,19 @@ def generate_insight_based_on_monthly_average(monthly_transactions):
     client.api_key = os.getenv('OPENAI_API_KEY')
     #model_engine = "gpt-3.5-turbo-1106"
     model_engine = "gpt-4-1106-preview"
-    system = f'''You are a insight generator of the transactions data, user will provide you three values:\n
+    system = f'''You are a insight generator of the transactions data, user will provide you four values:\n
                     1. total_deposits
                     2. total_withdrawls
                     3. monthly_average
-                based on this data you have to generate insight whether should the person qualifies for loan,\name
-                but before that consider one main point that the threshold to loan amount is 2.5 times of motnhly_average\n
+                    4. overall_transaction_insights
+                based on this transaction data you have to generate insight whether should the person qualifies for loan,\n
+                but before that consider one main point that the threshold to loan amount is 2.5 times of monthly_average\n
                 example: loan_threshold = 2.5 * monthly_average
                 Below are the instructions which you have to follow before generating insights:\n
                 Instruction 1: Display insight depending on the threshold ( calculate threshold using formula 2.5 times average monthly revenue )
                 about how much lending we should do as per your analysis.\n
                 Do not show threshold formula to user just consider it only for you.
                 Instruction 2: Insight should be short. \n
-
                 Below is the customer transaction data: {monthly_transactions}
                 '''
     prompt2=f''' Return only Insight based on the user transaction data with your analysis. '''
@@ -502,6 +502,7 @@ def average_monthly_balance(filled_gpt_json_data):
         'total_deposits' : total_deposits,
         'total_withdrawls' : total_withdrawls,
         'monthly_average' : monthly_average,
+        'overall_transaction_insights' : filled_gpt_json_data['insights']
     }
     insight_based_on_lending_criteria = generate_insight_based_on_monthly_average(data_for_gpt_to_fetch_lending_insight)
     main_data_shown_to_user = {
@@ -509,7 +510,8 @@ def average_monthly_balance(filled_gpt_json_data):
                             'Bank Name' : filled_gpt_json_data['bank_name'],
                             'Address' : filled_gpt_json_data['bank_address'],
                             'Average Monthly Revenue' : monthly_average,
-                            'Insight' : insight_based_on_lending_criteria,
+                            'Threshold insight' : insight_based_on_lending_criteria,
+                            'Overall transactions insight' : filled_gpt_json_data['insights'],
                         }
     return main_data_shown_to_user
 
@@ -652,7 +654,7 @@ def app_layout():
         print('\n\n',response_text)
         output = dataframe(response_text)
         st.table(output[0])
-        #st.table(output[1])
+        st.table(output[1])
         generated_file = output[1].to_csv(index=False)
         st.subheader(' ')
         st.markdown(download_file(generated_file, 'Detailed Report'), unsafe_allow_html=True)
