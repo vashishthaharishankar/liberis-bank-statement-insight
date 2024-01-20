@@ -655,7 +655,7 @@ def app_layout():
         st.table(output[1])
         generated_file = output[1].to_csv(index=False)
         st.subheader(' ')
-        st.markdown(download_file(generated_file, 'transaction_summary'), unsafe_allow_html=True)
+        st.markdown(download_file(generated_file, 'Detailed Report'), unsafe_allow_html=True)
 
         return  response_text
     else:
@@ -673,7 +673,7 @@ if __name__ == "__main__":
     if uploaded_file is None:
         st.write("Waiting for file upload...")
     if uploaded_file is not None:
-        button = st.button("Upload")
+        button = st.button("Generate Summary 📝")
         if button:
-            with st.spinner("Loading"):
+            with st.spinner("Processing..."):
                 app_layout()
