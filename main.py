@@ -654,7 +654,7 @@ def app_layout():
         print('\n\n',response_text)
         output = dataframe(response_text)
         st.table(output[0])
-        st.table(output[1])
+        #st.table(output[1])
         generated_file = output[1].to_csv(index=False)
         st.subheader(' ')
         st.markdown(download_file(generated_file, 'Detailed Report'), unsafe_allow_html=True)
