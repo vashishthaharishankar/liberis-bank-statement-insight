@@ -1,5 +1,6 @@
 import os
-from openai import OpenAI
+# from openai import OpenAI
+from openai import AzureOpenAI
 import streamlit as st
 import pandas as pd
 import logging
@@ -617,10 +618,12 @@ def handling_gpt_ouput(gpt_response):
     return []  # Return an empty list if extraction fails
 
 def extract_information_from_text(extracted_statement):
-    client = OpenAI()
-    client.api_key = os.getenv('OPENAI_API_KEY')
-    #model_engine = "gpt-3.5-turbo-1106"
-    model_engine = "gpt-4-1106-preview"
+    client = AzureOpenAI(
+                azure_endpoint = os.getenv("azure_endpoint"),
+                api_key = os.getenv("api_key"),
+                api_version = os.getenv("api_version")
+            )
+    model_engine = "gpt-4-turbo-preview"
     system = f'''You are a Bank statement Auditor, whose task is to fill raw json format keys with the data provided in users bank statement:
                 Raw Json Format is: {raw_json} \n
                 Before proceding further you have to follow below instructions:
@@ -634,7 +637,17 @@ def extract_information_from_text(extracted_statement):
     prompt2=f''' Give me the complete output in Json format from the response do not skip anything'''
 
     conversation1 = [{'role': 'system', 'content': system},{'role': 'user', 'content': prompt2}]
-    response = client.chat.completions.create(model=model_engine,messages=conversation1,temperature = 0)
+    response = client.chat.completions.create(
+            model='gpt-4',
+            messages=conversation1,
+            temperature=0,
+            max_tokens=3000,
+            n=1,
+            stop=None,
+            top_p=1,
+            frequency_penalty=0.9,
+            presence_penalty=0.2
+        )
     jsonify_response = response.choices[0].message.content
     print(jsonify_response)
     output = handling_gpt_ouput(jsonify_response)
