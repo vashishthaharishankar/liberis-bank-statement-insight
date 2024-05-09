@@ -371,7 +371,7 @@ raw_json = '''
             }
         ],
 
-        "Overall Bank Statement Insights" : ""
+        "One liner Bank Statement Insights" : ""
     }
 ]
 '''
@@ -557,7 +557,7 @@ def dataframe(response_text):
                     'customer_name': response_text[0]["Bank Information"]["Customer Name"],
                     'customer_account_number': response_text[0]["Bank Information"]["Customer Account Number"],
                     'customer_address': response_text[0]["Bank Information"]["Customer Address"],
-                    'insights': response_text[0]["Overall Bank Statement Insights"],
+                    'insights': response_text[0]["One liner Bank Statement Insights"],
                     'january': response_text[0]["Transaction Summary"][0]["January"],
                     'february': response_text[0]["Transaction Summary"][0]["February"],
                     'march': response_text[0]["Transaction Summary"][0]["March"],
@@ -630,11 +630,11 @@ def extract_information_from_text(extracted_statement):
                 Instruction 1 is Extract Bank Name, Bank Address, Bank Contact Number, User Account Number, User Address from the top of statement.\n
                 Instruction 2 is Classify the transaction data month wise and insert the total sum of all amounts into the raw json format in respective keys.\n
                 Instruction 3 is Do not skip any data in response, you have to write everything in response, do not leave anything for user to follow pattern.\n
-                Instruction 4 is Fetch insight based on the overall transaction trends and pattern and insert that into overall_insight key of josn.\n
+                Instruction 4 is Fetch insight based on the overall transaction trends and pattern and insert that into overall_insight key of json.\n
                 Instruction 5 is Return only response in JSON format please do not delete any keys of raw , structure should not change of unfilled json.\n
                 User Bank statement content is: {extracted_statement} \n
                 '''
-    prompt2=f''' Give me the complete output in Json format from the response do not skip anything'''
+    prompt2=f''' Give me the complete output in Json format from the response do not skip anything and do not add any comment in the answer'''
 
     conversation1 = [{'role': 'system', 'content': system},{'role': 'user', 'content': prompt2}]
     response = client.chat.completions.create(
