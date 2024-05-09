@@ -371,7 +371,7 @@ raw_json = '''
             }
         ],
 
-        "Overall Bank Statement Insights" : ""
+        "Short Bank Statement Insights" : ""
     }
 ]
 '''
@@ -638,10 +638,10 @@ def extract_information_from_text(extracted_statement):
 
     conversation1 = [{'role': 'system', 'content': system},{'role': 'user', 'content': prompt2}]
     response = client.chat.completions.create(
-            model='gpt-4',
+            model='gpt-4-1106-preview',
             messages=conversation1,
             temperature=0,
-            max_tokens=3000,
+            max_tokens=20000,
             n=1,
             stop=None,
             top_p=1,
